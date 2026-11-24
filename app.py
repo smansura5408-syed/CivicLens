@@ -1,11 +1,11 @@
 
 from flask import Flask, render_template, request, redirect, url_for, session
-import sqlite3
+import psycopg
 import os
 import secrets
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
-from database import create_database
+from database import create_database, get_db_connection
 
 app = Flask(__name__)
 
@@ -25,16 +25,6 @@ app.config["SESSION_COOKIE_SECURE"] = (
 )
 
 create_database()
-
-
-# --------------------------------
-# DATABASE CONNECTION
-# --------------------------------
-
-def get_db_connection():
-    conn = sqlite3.connect("civiclens.db")
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 # --------------------------------
@@ -104,10 +94,11 @@ def citizen_register():
             try:
                 cursor = conn.execute("""
                     INSERT INTO users (name, email, password_hash)
-                    VALUES (?, ?, ?)
+                    VALUES (%s, %s, %s)
+                    RETURNING id
                 """, (name, email, password_hash))
 
-                user_id = cursor.lastrowid
+                user_id = cursor.fetchone()["id"]
                 conn.commit()
 
                 session.clear()
@@ -117,7 +108,8 @@ def citizen_register():
 
                 return redirect(url_for("report"))
 
-            except sqlite3.IntegrityError:
+            except psycopg.errors.UniqueViolation:
+                conn.rollback()
                 error = "This email is already registered."
 
             finally:
@@ -142,12 +134,13 @@ def citizen_login():
 
         conn = get_db_connection()
 
-        user = conn.execute(
-            "SELECT * FROM users WHERE email = ?",
-            (email,)
-        ).fetchone()
-
-        conn.close()
+        try:
+            user = conn.execute(
+                "SELECT * FROM users WHERE email = %s",
+                (email,)
+            ).fetchone()
+        finally:
+            conn.close()
 
         if user and check_password_hash(user["password_hash"], password):
 
@@ -214,7 +207,8 @@ def submit():
         cursor = conn.execute("""
             INSERT INTO reports
             (name, email, category, location, description, user_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id
         """, (
             name,
             email,
@@ -224,7 +218,7 @@ def submit():
             session["user_id"]
         ))
 
-        report_id = cursor.lastrowid
+        report_id = cursor.fetchone()["id"]
         conn.commit()
 
     finally:
@@ -244,27 +238,29 @@ def citizen_dashboard():
     conn = get_db_connection()
     user_id = session["user_id"]
 
-    total = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE user_id = ?",
-        (user_id,)
-    ).fetchone()[0]
+    try:
+        total = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE user_id = %s",
+            (user_id,)
+        ).fetchone()["total"]
 
-    pending = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE user_id = ? AND status = 'Pending'",
-        (user_id,)
-    ).fetchone()[0]
+        pending = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE user_id = %s AND status = 'Pending'",
+            (user_id,)
+        ).fetchone()["total"]
 
-    progress = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE user_id = ? AND status = 'In Progress'",
-        (user_id,)
-    ).fetchone()[0]
+        progress = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE user_id = %s AND status = 'In Progress'",
+            (user_id,)
+        ).fetchone()["total"]
 
-    resolved = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE user_id = ? AND status = 'Resolved'",
-        (user_id,)
-    ).fetchone()[0]
+        resolved = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE user_id = %s AND status = 'Resolved'",
+            (user_id,)
+        ).fetchone()["total"]
 
-    conn.close()
+    finally:
+        conn.close()
 
     return render_template(
         "citizen_dashboard.html",
@@ -296,13 +292,15 @@ def my_complaints():
 
     conn = get_db_connection()
 
-    reports = conn.execute("""
-        SELECT * FROM reports
-        WHERE user_id = ?
-        ORDER BY id DESC
-    """, (session["user_id"],)).fetchall()
+    try:
+        reports = conn.execute("""
+            SELECT * FROM reports
+            WHERE user_id = %s
+            ORDER BY id DESC
+        """, (session["user_id"],)).fetchall()
 
-    conn.close()
+    finally:
+        conn.close()
 
     return render_template(
         "my_complaints.html",
@@ -332,15 +330,17 @@ def track_complaint():
         else:
             conn = get_db_connection()
 
-            report = conn.execute("""
-                SELECT * FROM reports
-                WHERE id = ? AND user_id = ?
-            """, (
-                int(complaint_id),
-                session["user_id"]
-            )).fetchone()
+            try:
+                report = conn.execute("""
+                    SELECT * FROM reports
+                    WHERE id = %s AND user_id = %s
+                """, (
+                    int(complaint_id),
+                    session["user_id"]
+                )).fetchone()
 
-            conn.close()
+            finally:
+                conn.close()
 
             if report is None:
                 error = "Complaint not found in your account."
@@ -379,12 +379,14 @@ def login():
 
         conn = get_db_connection()
 
-        admin = conn.execute(
-            "SELECT * FROM admins WHERE username = ?",
-            (username,)
-        ).fetchone()
+        try:
+            admin = conn.execute(
+                "SELECT * FROM admins WHERE username = %s",
+                (username,)
+            ).fetchone()
 
-        conn.close()
+        finally:
+            conn.close()
 
         if admin and check_password_hash(
             admin["password_hash"], password
@@ -411,12 +413,14 @@ def complaint_details(report_id):
 
     conn = get_db_connection()
 
-    report = conn.execute(
-        "SELECT * FROM reports WHERE id = ?",
-        (report_id,)
-    ).fetchone()
+    try:
+        report = conn.execute(
+            "SELECT * FROM reports WHERE id = %s",
+            (report_id,)
+        ).fetchone()
 
-    conn.close()
+    finally:
+        conn.close()
 
     if report is None:
         return "Complaint not found", 404
@@ -448,11 +452,11 @@ def admin_dashboard():
     if search:
         sql += """
             AND (
-                name LIKE ?
-                OR email LIKE ?
-                OR category LIKE ?
-                OR location LIKE ?
-                OR description LIKE ?
+                name ILIKE %s
+                OR email ILIKE %s
+                OR category ILIKE %s
+                OR location ILIKE %s
+                OR description ILIKE %s
             )
         """
 
@@ -460,7 +464,7 @@ def admin_dashboard():
         params.extend([keyword] * 5)
 
     if category_filter:
-        sql += " AND category = ?"
+        sql += " AND category = %s"
         params.append(category_filter)
 
     allowed_statuses = [
@@ -470,34 +474,36 @@ def admin_dashboard():
     ]
 
     if status_filter in allowed_statuses:
-        sql += " AND status = ?"
+        sql += " AND status = %s"
         params.append(status_filter)
 
     sql += " ORDER BY id DESC"
 
-    reports = conn.execute(sql, params).fetchall()
+    try:
+        reports = conn.execute(sql, params).fetchall()
 
-    categories = conn.execute(
-        "SELECT DISTINCT category FROM reports ORDER BY category"
-    ).fetchall()
+        categories = conn.execute(
+            "SELECT DISTINCT category FROM reports ORDER BY category"
+        ).fetchall()
 
-    total = conn.execute(
-        "SELECT COUNT(*) FROM reports"
-    ).fetchone()[0]
+        total = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports"
+        ).fetchone()["total"]
 
-    pending = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE status = 'Pending'"
-    ).fetchone()[0]
+        pending = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE status = 'Pending'"
+        ).fetchone()["total"]
 
-    progress = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE status = 'In Progress'"
-    ).fetchone()[0]
+        progress = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE status = 'In Progress'"
+        ).fetchone()["total"]
 
-    resolved = conn.execute(
-        "SELECT COUNT(*) FROM reports WHERE status = 'Resolved'"
-    ).fetchone()[0]
+        resolved = conn.execute(
+            "SELECT COUNT(*) AS total FROM reports WHERE status = 'Resolved'"
+        ).fetchone()["total"]
 
-    conn.close()
+    finally:
+        conn.close()
 
     return render_template(
         "admin.html",
@@ -534,16 +540,19 @@ def update_status(report_id):
 
     conn = get_db_connection()
 
-    cursor = conn.execute(
-        "UPDATE reports SET status = ? WHERE id = ?",
-        (status, report_id)
-    )
+    try:
+        cursor = conn.execute(
+            "UPDATE reports SET status = %s WHERE id = %s",
+            (status, report_id)
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
 
-    if cursor.rowcount == 0:
-        return "Complaint not found", 404
+        if cursor.rowcount == 0:
+            return "Complaint not found", 404
+
+    finally:
+        conn.close()
 
     return redirect(url_for("admin_dashboard"))
 
@@ -566,5 +575,5 @@ def logout():
 
 if __name__ == "__main__":
     app.run(
-        debug=os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+        debug=os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     )
