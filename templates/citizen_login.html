@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicLens - Citizen Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #071a3d, #123f78, #087eaa);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 430px;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #123f78;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #12345a;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #087eaa;
+            box-shadow: 0 0 5px rgba(8,126,170,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #087eaa;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #075d83;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #b00020;
+            padding: 10px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+            line-height: 2;
+        }
+
+        a {
+            color: #087eaa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>CivicLens</h1>
+        <p class="subtitle">Welcome Back, Citizen!</p>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form action="{{ url_for('citizen_login') }}" method="POST">
+
+            <label>Email Address</label>
+            <input type="email" name="email"
+                   placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" name="password"
+                   placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+        <div class="links">
+            Don't have an account?
+            <a href="{{ url_for('citizen_register') }}">Register</a>
+            <br>
+            <a href="{{ url_for('home') }}">Back to Home</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

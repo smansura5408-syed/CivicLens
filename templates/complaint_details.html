@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Details | CivicLens</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #10172a, #172554);
+            color: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #334155;
+            box-shadow: 0 8px 25px #0005;
+        }
+
+        .detail {
+            margin-bottom: 22px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .detail h3 {
+            color: #93c5fd;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .detail p {
+            color: #f8fafc;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            display: inline-block;
+            background: #854d0e;
+            color: #fef08a;
+            padding: 7px 15px;
+            border-radius: 20px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 22px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .back:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Complaint Details</h1>
+    <p class="subtitle">CivicLens | Admin Dashboard</p>
+
+    <div class="card">
+
+        <div class="detail">
+            <h3>Complaint ID</h3>
+            <p>{{ report['id'] }}</p>
+        </div>
+
+        <div class="detail">
+            <h3>Complaint Title</h3>
+            <p>{{ report['title'] }}</p>
+        </div>
+
+        <div class="detail">
+            <h3>Description</h3>
+            <p>{{ report['description'] }}</p>
+        </div>
+
+        <div class="detail">
+            <h3>Location</h3>
+            <p>{{ report['location'] }}</p>
+        </div>
+
+        <div class="detail">
+            <h3>Status</h3>
+            <p><span class="status">{{ report['status'] }}</span></p>
+        </div>
+
+    </div>
+
+    <a href="{{ url_for('admin_dashboard') }}" class="back">
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

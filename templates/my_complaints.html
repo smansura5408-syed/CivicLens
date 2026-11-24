@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicLens - My Complaints</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #071a3d, #123f78, #087eaa);
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+        }
+
+        h1 {
+            text-align: center;
+            color: #123f78;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .complaint-card {
+            background: #f0f7fc;
+            border-left: 5px solid #087eaa;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .complaint-card h3 {
+            color: #123f78;
+            margin-bottom: 15px;
+        }
+
+        .complaint-card p {
+            color: #475569;
+            margin: 10px 0;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fff1c2;
+            color: #8a5700;
+        }
+
+        .in-progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .track-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 18px;
+            background: #087eaa;
+            color: white;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .track-btn:hover {
+            background: #075d83;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px;
+            color: #64748b;
+            background: #f0f7fc;
+            border-radius: 10px;
+        }
+
+        .empty h3 {
+            color: #123f78;
+            margin-bottom: 12px;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #087eaa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        @media(max-width: 600px) {
+            .container {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🌐 CivicLens</h1>
+        <p class="subtitle">My Submitted Complaints</p>
+
+        {% if reports %}
+
+            {% for complaint in reports %}
+
+                <div class="complaint-card">
+
+                    <h3>Complaint #{{ complaint.id }}</h3>
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ complaint.category }}
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ complaint.location }}
+                    </p>
+
+                    <p>
+                        <strong>Description:</strong>
+                        {{ complaint.description }}
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+
+                        {% if complaint.status == 'Pending' %}
+                            <span class="status pending">
+                                Pending
+                            </span>
+
+                        {% elif complaint.status == 'In Progress' %}
+                            <span class="status in-progress">
+                                In Progress
+                            </span>
+
+                        {% elif complaint.status == 'Resolved' %}
+                            <span class="status resolved">
+                                Resolved
+                            </span>
+
+                        {% else %}
+                            <span class="status pending">
+                                {{ complaint.status }}
+                            </span>
+                        {% endif %}
+
+                    </p>
+
+                    <a class="track-btn"
+                       href="{{ url_for('track_complaint') }}">
+                        Track Complaint
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                <h3>📭 No Complaints Found</h3>
+                <p>You haven't submitted any complaints yet.</p>
+            </div>
+
+        {% endif %}
+
+        <a class="back"
+           href="{{ url_for('report') }}">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

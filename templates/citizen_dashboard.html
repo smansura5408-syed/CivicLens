@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicLens - Citizen Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: #f0f5fa;
+            color: #12345a;
+        }
+
+        header {
+            background: linear-gradient(135deg, #071a3d, #087eaa);
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            font-size: 27px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.18);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        header a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 45px auto;
+            padding: 20px;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #123f78;
+        }
+
+        .welcome p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        /* STATISTICS SECTION */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            border-left: 5px solid #087eaa;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card h2 {
+            color: #123f78;
+            font-size: 32px;
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: #e5a000;
+        }
+
+        .stat-card:nth-child(3) {
+            border-left-color: #087eaa;
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: #16a36a;
+        }
+
+        /* DASHBOARD CARDS */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card .icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #123f78;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card a {
+            display: inline-block;
+            background: #087eaa;
+            color: white;
+            padding: 11px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .card a:hover {
+            background: #075d83;
+        }
+
+        /* ABOUT SECTION */
+
+        .info {
+            background: white;
+            margin-top: 30px;
+            padding: 25px;
+            border-left: 5px solid #087eaa;
+            border-radius: 10px;
+            line-height: 1.8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                padding: 20px;
+            }
+
+            .welcome h2 {
+                font-size: 24px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+
+    <header>
+        <h1>🌐 CivicLens</h1>
+        <a href="{{ url_for('home') }}">Home</a>
+    </header>
+
+
+    <div class="container">
+
+        <!-- WELCOME SECTION -->
+
+        <div class="welcome">
+            <h2>Welcome to Your Dashboard! 👋</h2>
+
+            <p>
+                Manage your complaints and stay connected
+                with your community.
+            </p>
+        </div>
+
+
+        <!-- COMPLAINT STATISTICS -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <h3>📊 Total Complaints</h3>
+                <h2>{{ total|default(0) }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>🟡 Pending Complaints</h3>
+                <h2>{{ pending|default(0) }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>🔵 In Progress</h3>
+                <h2>{{ progress|default(0) }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <h3>🟢 Resolved Complaints</h3>
+                <h2>{{ resolved|default(0) }}</h2>
+            </div>
+
+        </div>
+
+
+        <!-- DASHBOARD OPTIONS -->
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="icon">📝</div>
+
+                <h3>Submit a Complaint</h3>
+
+                <p>
+                    Report public issues and share
+                    problems in your area.
+                </p>
+
+                <a href="{{ url_for('report') }}">
+                    Submit Now
+                </a>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="icon">📍</div>
+
+                <h3>Track Complaints</h3>
+
+                <p>
+                    Stay updated about the progress
+                    of your submitted complaints.
+                </p>
+
+                <a href="{{ url_for('my_complaints') }}">
+                    View Reports
+                </a>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="icon">🏛️</div>
+
+                <h3>Citizen Services</h3>
+
+                <p>
+                    Access CivicLens and help make
+                    your community better.
+                </p>
+
+                <a href="{{ url_for('home') }}">
+                    Explore
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ABOUT CIVICLENS -->
+
+        <div class="info">
+
+            <h3>💡 About CivicLens</h3>
+
+            <p>
+                CivicLens is a smart citizen portal that helps people
+                report public issues and improve communication
+                between citizens and authorities.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+        © 2026 CivicLens | Smart Citizen Portal
+    </footer>
+
+</body>
+</html>

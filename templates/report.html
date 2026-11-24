@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report an Issue | CivicLens</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px #00000012;
+        }
+
+        h1 {
+            color: #102c4e;
+            text-align: center;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 14px;
+            background: #176b87;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #102c4e;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #176b87;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Report a Civic Issue</h1>
+    <p>Help us make your community better!</p>
+
+    <form action="/submit" method="POST" enctype="multipart/form-data">
+
+        <label>Citizen Name</label>
+        <input type="text" name="name" required>
+
+        <label>Email Address</label>
+        <input type="email" name="email" required>
+
+        <label>Issue Category</label>
+        <select name="category" required>
+            <option value="">Select an issue</option>
+            <option>Road Damage</option>
+            <option>Garbage Problem</option>
+            <option>Streetlight Problem</option>
+            <option>Water Leakage</option>
+            <option>Other</option>
+        </select>
+
+        <label>Location</label>
+        <input type="text" name="location"
+               placeholder="Enter your area or address" required>
+
+        <label>Describe the Issue</label>
+        <textarea name="description" rows="5"
+                  placeholder="Explain the problem..." required></textarea>
+
+        <label>Upload Issue Photo</label>
+        <input type="file" name="photo" accept="image/*">
+
+        <button type="submit">Submit Report</button>
+
+    </form>
+
+    <a href="/">← Back to Home</a>
+
+</div>
+
+</body>
+</html>

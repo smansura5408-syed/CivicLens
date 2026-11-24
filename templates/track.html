@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicLens - Track Complaint</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #312e81);
+            min-height: 100vh;
+            color: #1e293b;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 30px auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #cbd5e1;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+            min-width: 0;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        button {
+            padding: 14px 22px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 13px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .details {
+            background: #eff6ff;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .details p {
+            margin: 10px 0;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .details strong {
+            color: #1e3a8a;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .progress {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 30px 0 10px;
+            padding-left: 15px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            position: relative;
+            min-height: 100px;
+        }
+
+        .step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 17px;
+            top: 38px;
+            width: 4px;
+            height: 62px;
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        .step.completed:not(:last-child)::after {
+            background: #16a34a;
+        }
+
+        .circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .step.completed .circle {
+            background: #16a34a;
+            color: white;
+        }
+
+        .step.active .circle {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 0 0 5px #dbeafe;
+        }
+
+        .step-content h3 {
+            font-size: 17px;
+            margin: 7px 0;
+            color: #1e293b;
+        }
+
+        .step-content p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .step.active h3 {
+            color: #2563eb;
+        }
+
+        .home-btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            background: #1e3a8a;
+            color: white;
+            padding: 14px;
+            border-radius: 9px;
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        .home-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .footer {
+            text-align: center;
+            color: #cbd5e1;
+            margin-top: 25px;
+            font-size: 13px;
+        }
+
+        @media(max-width: 500px) {
+            .search-form {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>🏛️ CivicLens</h1>
+        <p>Track your complaint and stay updated</p>
+    </div>
+
+    <div class="card">
+
+        <h2>🔍 Track Your Complaint</h2>
+
+        <form method="POST"
+              action="{{ url_for('track_complaint') }}"
+              class="search-form">
+
+            <input
+                type="number"
+                name="complaint_id"
+                placeholder="Enter your Complaint ID"
+                min="1"
+                required
+            >
+
+            <button type="submit">Track Now</button>
+
+        </form>
+
+        {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+    </div>
+
+    {% if report %}
+
+    <div class="card">
+
+        <h2>📋 Complaint Details</h2>
+
+        <div class="details">
+
+            <p>
+                <strong>Complaint ID:</strong>
+                #{{ report['id'] }}
+            </p>
+
+            <p>
+                <strong>Citizen Name:</strong>
+                {{ report['name'] }}
+            </p>
+
+            <p>
+                <strong>Category:</strong>
+                {{ report['category'] }}
+            </p>
+
+            <p>
+                <strong>Location:</strong>
+                {{ report['location'] }}
+            </p>
+
+            <p>
+                <strong>Description:</strong>
+                {{ report['description'] }}
+            </p>
+
+            <p>
+                <strong>Current Status:</strong>
+
+                {% if report['status'] == 'Pending' %}
+                    <span class="status pending">Pending</span>
+
+                {% elif report['status'] == 'In Progress' %}
+                    <span class="status progress">In Progress</span>
+
+                {% elif report['status'] == 'Resolved' %}
+                    <span class="status resolved">Resolved</span>
+
+                {% else %}
+                    <span class="status pending">
+                        {{ report['status'] }}
+                    </span>
+                {% endif %}
+
+            </p>
+
+        </div>
+
+        <h2>📍 Complaint Progress</h2>
+
+        <div class="timeline">
+
+            <!-- STEP 1 -->
+            <div class="step completed">
+
+                <div class="circle">✓</div>
+
+                <div class="step-content">
+                    <h3>Complaint Submitted</h3>
+                    <p>Your complaint has been successfully registered.</p>
+                </div>
+
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step
+                {% if stage_index >= 1 %}completed{% endif %}
+                {% if stage_index == 1 %}active{% endif %}">
+
+                <div class="circle">
+                    {% if stage_index >= 1 %}✓{% else %}2{% endif %}
+                </div>
+
+                <div class="step-content">
+                    <h3>Under Review</h3>
+                    <p>Your complaint is waiting for administrative review.</p>
+                </div>
+
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step
+                {% if stage_index >= 2 %}completed{% endif %}
+                {% if stage_index == 2 %}active{% endif %}">
+
+                <div class="circle">
+                    {% if stage_index >= 2 %}✓{% else %}3{% endif %}
+                </div>
+
+                <div class="step-content">
+                    <h3>In Progress</h3>
+                    <p>Action is being taken to solve your complaint.</p>
+                </div>
+
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="step
+                {% if stage_index >= 3 %}completed{% endif %}
+                {% if stage_index == 3 %}active{% endif %}">
+
+                <div class="circle">
+                    {% if stage_index >= 3 %}✓{% else %}4{% endif %}
+                </div>
+
+                <div class="step-content">
+                    <h3>Resolved</h3>
+                    <p>Your complaint has been successfully resolved.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <a href="{{ url_for('my_complaints') }}" class="home-btn">
+        ← Back to My Complaints
+    </a>
+
+    <div class="footer">
+        © 2026 CivicLens | Smart Citizen Portal
+    </div>
+
+</div>
+
+</body>
+</html>
